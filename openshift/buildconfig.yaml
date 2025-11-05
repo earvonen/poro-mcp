@@ -21,7 +21,6 @@ spec:
   triggers:
   - type: ConfigChange
   - type: ImageChange
-  - type: GitHub
   resources:
     limits:
       memory: 2Gi

@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quarkus-mcp
+  labels:
+    app: quarkus-mcp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: quarkus-mcp
+  template:
+    metadata:
+      labels:
+        app: quarkus-mcp
+    spec:
+      containers:
+      - name: quarkus-mcp
+        image: quarkus-mcp:latest
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: VLLM_BASE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: quarkus-mcp-config
+              key: vllm-base-url
+        - name: PORO2_MODEL_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: quarkus-mcp-config
+              key: poro2-model-name
+        - name: VLLM_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: quarkus-mcp-secret
+              key: api-key
+              optional: true
+        - name: DEFAULT_TEMPERATURE
+          valueFrom:
+            configMapKeyRef:
+              name: quarkus-mcp-config
+              key: default-temperature
+              optional: true
+        - name: DEFAULT_MAX_TOKENS
+          valueFrom:
+            configMapKeyRef:
+              name: quarkus-mcp-config
+              key: default-max-tokens
+              optional: true
+        stdin: true
+        tty: true
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "200m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+

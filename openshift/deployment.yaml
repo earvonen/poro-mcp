@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: poro-mcp
+  labels:
+    app: poro-mcp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: poro-mcp
+  template:
+    metadata:
+      labels:
+        app: poro-mcp
+    spec:
+      containers:
+      - name: poro-mcp
+        image: poro-mcp:latest
+        imagePullPolicy: Always
+        stdin: true
+        tty: true
+        env:
+        - name: VLLM_BASE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: poro-mcp-config
+              key: vllm-base-url
+        - name: PORO2_MODEL_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: poro-mcp-config
+              key: poro2-model-name
+        - name: VLLM_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: poro-mcp-secret
+              key: api-key
+              optional: true
+        - name: DEFAULT_TEMPERATURE
+          valueFrom:
+            configMapKeyRef:
+              name: poro-mcp-config
+              key: default-temperature
+              optional: true
+        - name: DEFAULT_MAX_TOKENS
+          valueFrom:
+            configMapKeyRef:
+              name: poro-mcp-config
+              key: default-max-tokens
+              optional: true
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "200m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+      restartPolicy: Always
+

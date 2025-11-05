@@ -1,0 +1,29 @@
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: poro-mcp
+  labels:
+    app: poro-mcp
+spec:
+  source:
+    type: Binary
+    binary: {}
+  strategy:
+    type: Docker
+    dockerStrategy:
+      dockerfilePath: Containerfile
+  output:
+    to:
+      kind: ImageStreamTag
+      name: poro-mcp:latest
+  triggers:
+  - type: ConfigChange
+  - type: ImageChange
+  resources:
+    limits:
+      memory: 2Gi
+      cpu: "1000m"
+    requests:
+      memory: 1Gi
+      cpu: "500m"
+

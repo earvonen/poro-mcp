@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: poro-mcp-config
+data:
+  vllm-base-url: "http://vllm:8000"
+  poro2-model-name: "LumiOpen/Llama-Poro-2-70B-Instruct"
+  default-temperature: "0.7"
+  default-max-tokens: "800"
+

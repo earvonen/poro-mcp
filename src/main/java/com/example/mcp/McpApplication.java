@@ -13,8 +13,8 @@ public class McpApplication implements QuarkusApplication {
 
     @Override
     public int run(String... args) {
-        MainCommand mainCommand = mainCommandInstance.get();
-        mainCommand.run();
+        MainCommand command = mainCommandInstance.get();
+        command.run();
         return 0;
     }
 }

@@ -9,15 +9,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.jboss.logging.Logger;
-import picocli.CommandLine;
-import picocli.CommandLine.Command;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Map;
 
-@Command(name = "quarkus-mcp", mixinStandardHelpOptions = true)
 @ApplicationScoped
 public class MainCommand implements Runnable {
     private static final Logger LOG = Logger.getLogger(MainCommand.class);

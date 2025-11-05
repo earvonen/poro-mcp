@@ -6,8 +6,10 @@ metadata:
     app: poro-mcp
 spec:
   source:
-    type: Binary
-    binary: {}
+    type: Git
+    git:
+      uri: https://github.com/earvonen/poro-mcp.git
+      ref: main
   strategy:
     type: Docker
     dockerStrategy:
@@ -19,6 +21,7 @@ spec:
   triggers:
   - type: ConfigChange
   - type: ImageChange
+  - type: GitHub
   resources:
     limits:
       memory: 2Gi

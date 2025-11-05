@@ -29,17 +29,26 @@ oc edit secret poro-mcp-secret
 
 #### Option A: Using BuildConfig (Recommended)
 
-```bash
-# Start a binary build
-oc new-build --name=poro-mcp --binary --strategy=docker
-oc start-build poro-mcp --from-dir=. --follow
-```
-
-Or use the BuildConfig manifest:
+Use the BuildConfig manifest:
 ```bash
 oc create -f openshift/buildconfig.yaml
-oc start-build poro-mcp --from-dir=. --follow
 ```
+
+The build will automatically trigger when:
+- The BuildConfig is created (ConfigChange trigger)
+- The base image changes (ImageChange trigger)
+- Code is pushed to the GitHub repository (GitHub webhook trigger)
+
+To manually start a build:
+```bash
+oc start-build poro-mcp --follow
+```
+
+**Note**: For GitHub webhook triggers to work, configure the webhook in your GitHub repository pointing to your OpenShift cluster's webhook URL. Get the webhook URL with:
+```bash
+oc describe bc poro-mcp | grep webhook
+```
+No authentication is required for the public GitHub repository.
 
 #### Option B: Build locally and push
 

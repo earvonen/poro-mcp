@@ -31,20 +31,20 @@ public class LlamaStackEndpoint {
     ObjectMapper objectMapper;
 
     @GET
-    @Path("tools/_stcore/health")
+    @Path("/tools/_stcore/health")
     public Map<String, String> toolsHealth() {
         return Map.of("status", "ok");
     }
 
     @GET
-    @Path("tools/_stcore/host-config")
+    @Path("/tools/_stcore/host-config")
     public Map<String, Object> hostConfig() {
         // Streamlit expects a JSON object even if empty
         return Collections.emptyMap();
     }
 
     @GET
-    @Path("v1/tools")
+    @Path("/v1/tools")
     @SuppressWarnings("unchecked")
     public Map<String, Object> listTools(@QueryParam("toolgroup_id") String toolGroupId) {
         LOG.infof("LlamaStack list tools invoked for group %s", toolGroupId);

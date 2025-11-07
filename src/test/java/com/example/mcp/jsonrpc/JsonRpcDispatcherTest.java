@@ -1,6 +1,5 @@
 package com.example.mcp.jsonrpc;
 
-import com.example.mcp.MainCommand;
 import com.example.mcp.service.McpService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.test.junit.QuarkusTest;

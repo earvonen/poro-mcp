@@ -11,7 +11,7 @@ import org.jboss.logging.Logger;
 
 import java.util.Map;
 
-@Path("/mcp")
+@Path("/mcp/v1")
 @ApplicationScoped
 public class McpHttpEndpoint {
     private static final Logger LOG = Logger.getLogger(McpHttpEndpoint.class);
@@ -29,17 +29,17 @@ public class McpHttpEndpoint {
         return mcpService.handleInitialize(requestId);
     }
 
-    @POST
-    @Path("/tools/list")
+    @GET
+    @Path("/tools")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public JsonRpcResponse toolsList(@QueryParam("id") String id) {
+    public JsonRpcResponse toolsList(@QueryParam("toolgroup_id") String id) {
         LOG.infof("HTTP: tools/list request with id=%s", id);
         Object requestId = id != null ? id : "1";
         return mcpService.handleToolsList(requestId);
     }
 
-    @POST
+    @GET
     @Path("/tools/call")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)

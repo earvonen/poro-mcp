@@ -4,7 +4,7 @@ A Java + Quarkus implementation of a Model Context Protocol (MCP) server that pr
 
 ## Features
 
-- **MCP Protocol**: Full JSON-RPC 2.0 over stdio implementation
+- **MCP Protocol**: Full JSON-RPC 2.0 implementation with SSE streaming
 - **Tool**: `draft_finnish` - Compose high-quality Finnish text from structured notes
 - **Quarkus Command Mode**: No HTTP server required, pure stdio communication
 - **OpenAI-Compatible API**: Works with vLLM and any OpenAI-compatible endpoint
@@ -92,63 +92,28 @@ curl -X POST http://localhost:8080/mcp/tools/call?id=3 \
   }'
 ```
 
-### Manual Testing via stdin/stdout
+### SSE Streaming Interface
 
-#### Initialize Request
-
-```bash
-echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}' | java -jar target/quarkus-mcp-1.0.0-SNAPSHOT.jar
-```
-
-Expected response:
-```json
-{
-  "jsonrpc": "2.0",
-  "id": 1,
-  "result": {
-    "protocolVersion": "2024-11-05",
-    "capabilities": {
-      "tools": {}
-    },
-    "serverInfo": {
-      "name": "quarkus-mcp-poro2",
-      "version": "1.0.0"
-    }
-  }
-}
-```
-
-#### List Tools
+The application implements the MCP protocol over Server-Sent Events (SSE):
 
 ```bash
-echo '{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}' | java -jar target/quarkus-mcp-1.0.0-SNAPSHOT.jar
+# Terminal 1: connect to the SSE stream
+curl -N http://localhost:8080/mcp/stream?clientId=demo
+
+# Terminal 2: send an MCP request
+curl -X POST http://localhost:8080/mcp/request?clientId=demo \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": "req-1",
+    "method": "tools/list",
+    "params": {}
+  }'
+
+# The response appears in Terminal 1 as a streamed SSE event
 ```
 
-#### Call Tool
-
-```bash
-cat <<EOF | java -jar target/quarkus-mcp-1.0.0-SNAPSHOT.jar
-{
-  "jsonrpc": "2.0",
-  "id": 3,
-  "method": "tools/call",
-  "params": {
-    "name": "draft_finnish",
-    "arguments": {
-      "brief": "Selitä arkkitehtuuri",
-      "key_points": [
-        "Planner-scribe -malli",
-        "MCP-työkalu toimii sovitin-kerroksena",
-        "OpenShiftissa ajetaan vLLM"
-      ],
-      "tone": "professional",
-      "length": "medium",
-      "audience": "ratkaisuarkkitehdit"
-    }
-  }
-}
-EOF
-```
+You can send additional JSON-RPC requests (initialize, tools/call, ping) through the `/mcp/request` endpoint and receive responses in real time via the SSE stream.
 
 #### Ping
 

@@ -27,26 +27,18 @@ public class McpSseEndpoint {
     McpRequestProcessor requestProcessor;
 
     @GET
+    @Produces(MediaType.SERVER_SENT_EVENTS)
+    @RestStreamElementType(MediaType.APPLICATION_JSON)
+    public Multi<Object> rootStream(@QueryParam("clientId") String clientId) {
+        return openStream(clientId);
+    }
+
+    @GET
     @Path("/stream")
     @Produces(MediaType.SERVER_SENT_EVENTS)
     @RestStreamElementType(MediaType.APPLICATION_JSON)
-    public Multi<Object> stream(@QueryParam("clientId") String clientId) {
-        String id = (clientId == null || clientId.isBlank()) ? UUID.randomUUID().toString() : clientId;
-        LOG.infof("SSE client connected: %s", id);
-
-        return Multi.createFrom().emitter(emitter -> {
-            clientEmitters.put(id, emitter);
-            emitter.onTermination(() -> {
-                LOG.infof("SSE client disconnected: %s", id);
-                clientEmitters.remove(id);
-            });
-
-            emitter.emit(Map.of(
-                "event", "connected",
-                "clientId", id,
-                "status", "connected"
-            ));
-        });
+    public Multi<Object> streamAlias(@QueryParam("clientId") String clientId) {
+        return openStream(clientId);
     }
 
     @POST
@@ -81,6 +73,25 @@ public class McpSseEndpoint {
             LOG.warnf(e, "Failed to emit SSE event to client %s", clientId);
             clientEmitters.remove(clientId);
         }
+    }
+
+    private Multi<Object> openStream(String clientId) {
+        String id = (clientId == null || clientId.isBlank()) ? UUID.randomUUID().toString() : clientId;
+        LOG.infof("SSE client connected: %s", id);
+
+        return Multi.createFrom().emitter(emitter -> {
+            clientEmitters.put(id, emitter);
+            emitter.onTermination(() -> {
+                LOG.infof("SSE client disconnected: %s", id);
+                clientEmitters.remove(id);
+            });
+
+            emitter.emit(Map.of(
+                "event", "connected",
+                "clientId", id,
+                "status", "connected"
+            ));
+        });
     }
 }
 

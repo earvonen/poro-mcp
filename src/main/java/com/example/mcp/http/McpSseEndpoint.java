@@ -42,14 +42,20 @@ public class McpSseEndpoint {
     }
 
     @POST
-    @Path("/request")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public JsonRpcResponse handleRequest(JsonRpcRequest request,
                                          @QueryParam("clientId") String clientId) {
-        JsonRpcResponse response = requestProcessor.handle(request);
-        broadcastResponse(clientId, response);
-        return response;
+        return processRequest(request, clientId);
+    }
+
+    @POST
+    @Path("/request")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public JsonRpcResponse handleRequestAlias(JsonRpcRequest request,
+                                              @QueryParam("clientId") String clientId) {
+        return processRequest(request, clientId);
     }
 
     private void broadcastResponse(String clientId, JsonRpcResponse response) {
@@ -58,6 +64,12 @@ public class McpSseEndpoint {
         } else {
             clientEmitters.keySet().forEach(id -> emit(id, response));
         }
+    }
+
+    private JsonRpcResponse processRequest(JsonRpcRequest request, String clientId) {
+        JsonRpcResponse response = requestProcessor.handle(request);
+        broadcastResponse(clientId, response);
+        return response;
     }
 
     private void emit(String clientId, Object payload) {

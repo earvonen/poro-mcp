@@ -87,9 +87,12 @@ public class McpSseEndpoint {
             });
 
             emitter.emit(Map.of(
-                "event", "connected",
-                "clientId", id,
-                "status", "connected"
+                "jsonrpc", "2.0",
+                "method", "connected",
+                "params", Map.of(
+                    "clientId", id,
+                    "status", "connected"
+                )
             ));
         });
     }

@@ -7,7 +7,8 @@ This directory contains OpenShift manifests for deploying the Quarkus MCP server
 - `Containerfile` - Container build definition (root directory)
 - `buildconfig.yaml` - BuildConfig to build the application image
 - `deployment.yaml` - Deployment manifest for the poro-mcp application
-- `service.yaml` - Service manifest (optional, for potential health checks)
+- `service.yaml` - Service manifest for HTTP endpoints
+- `route.yaml` - Route to expose HTTP endpoints externally (optional)
 - `configmap.yaml` - Configuration values
 - `secret.yaml` - Secret for API keys (update before deployment)
 
@@ -70,7 +71,20 @@ oc create -f openshift/deployment.yaml
 oc create -f openshift/service.yaml
 ```
 
-### 4. Verify Deployment
+### 4. Expose the Service (Optional)
+
+To expose the HTTP endpoints externally, create a Route:
+
+```bash
+oc create -f openshift/route.yaml
+```
+
+Get the route URL:
+```bash
+oc get route poro-mcp
+```
+
+### 5. Verify Deployment
 
 ```bash
 # Check pod status
@@ -81,6 +95,9 @@ oc logs -f deployment/poro-mcp
 
 # Check service
 oc get svc poro-mcp
+
+# Test HTTP endpoint (if route is created)
+curl https://$(oc get route poro-mcp -o jsonpath='{.spec.host}')/mcp/health
 ```
 
 ## Configuration
@@ -93,7 +110,40 @@ Update the ConfigMap values as needed:
 
 ## Using the MCP Server
 
-The application runs as a stdio-based MCP server. To interact with it:
+### HTTP Endpoints (Recommended)
+
+The application exposes HTTP endpoints for easier access:
+
+```bash
+# Get route URL
+ROUTE_URL=$(oc get route poro-mcp -o jsonpath='{.spec.host}')
+
+# Health check
+curl https://$ROUTE_URL/mcp/health
+
+# Initialize
+curl -X POST https://$ROUTE_URL/mcp/initialize?id=1 \
+  -H "Content-Type: application/json"
+
+# List tools
+curl -X POST https://$ROUTE_URL/mcp/tools/list?id=2 \
+  -H "Content-Type: application/json"
+
+# Call tool
+curl -X POST https://$ROUTE_URL/mcp/tools/call?id=3 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "draft_finnish",
+    "arguments": {
+      "brief": "Test task",
+      "key_points": ["Point 1", "Point 2"]
+    }
+  }'
+```
+
+### Stdio Mode (Alternative)
+
+The application also supports stdio-based MCP communication:
 
 ```bash
 # Get pod name
@@ -105,8 +155,10 @@ oc exec -it $POD_NAME -- sh -c 'echo "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\
 
 ## Notes
 
-- The service is optional since the MCP server communicates via stdio
-- Adjust resource limits in `deployment.yaml` based on your needs
-- The application requires `stdin: true` and `tty: true` for stdio communication
+- The application supports both HTTP endpoints (recommended) and stdio-based MCP communication
+- HTTP endpoints are available on port 8080 and can be accessed via the Service
+- Use the Route manifest to expose HTTP endpoints externally
+- The application requires `stdin: true` and `tty: true` for stdio communication (still supported)
 - Ensure the vLLM server is accessible from the pod (same namespace or proper service)
+- Adjust resource limits in `deployment.yaml` based on your needs
 

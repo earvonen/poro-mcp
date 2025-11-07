@@ -8,11 +8,9 @@ spec:
   selector:
     app: poro-mcp
   ports:
-  - name: stdio
+  - name: http
     port: 8080
     targetPort: 8080
     protocol: TCP
   type: ClusterIP
-  # Note: This service is primarily for potential health checks or future HTTP endpoints
-  # The MCP server communicates via stdio, so the service may not be strictly necessary
 

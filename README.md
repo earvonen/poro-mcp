@@ -56,6 +56,42 @@ java -jar target/quarkus-mcp-1.0.0-SNAPSHOT.jar
 ./mvnw test
 ```
 
+### HTTP Endpoints
+
+The application exposes HTTP endpoints for easier access from outside the container:
+
+- `GET /mcp/health` - Health check endpoint
+- `POST /mcp/initialize?id=<id>` - Initialize MCP connection
+- `POST /mcp/tools/list?id=<id>` - List available tools
+- `POST /mcp/tools/call?id=<id>` - Call a tool (requires JSON body)
+- `POST /mcp/ping?id=<id>` - Ping endpoint
+
+**Example HTTP requests:**
+
+```bash
+# Health check
+curl http://localhost:8080/mcp/health
+
+# Initialize
+curl -X POST http://localhost:8080/mcp/initialize?id=1 \
+  -H "Content-Type: application/json"
+
+# List tools
+curl -X POST http://localhost:8080/mcp/tools/list?id=2 \
+  -H "Content-Type: application/json"
+
+# Call tool
+curl -X POST http://localhost:8080/mcp/tools/call?id=3 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "draft_finnish",
+    "arguments": {
+      "brief": "Test task",
+      "key_points": ["Point 1", "Point 2"]
+    }
+  }'
+```
+
 ### Manual Testing via stdin/stdout
 
 #### Initialize Request

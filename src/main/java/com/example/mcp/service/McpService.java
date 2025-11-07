@@ -21,7 +21,7 @@ public class McpService {
     private final Map<String, ToolInterface> tools = new HashMap<>();
 
     public void init() {
-        tools.put("draft_finnish", draftFinnishTool);
+        tools.put("mcp::draft_finnish", draftFinnishTool);
     }
 
     public JsonRpcResponse handleInitialize(Object id) {

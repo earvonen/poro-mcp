@@ -1,10 +1,10 @@
 package com.example.mcp.http;
 
+import com.example.mcp.http.dto.LlamaStackTool;
+import com.example.mcp.http.dto.LlamaStackToolListResponse;
 import com.example.mcp.jsonrpc.JsonRpcResponse;
 import com.example.mcp.mcp.Tool;
-import com.example.mcp.service.McpRequestProcessor;
 import com.example.mcp.service.McpService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
@@ -17,18 +17,16 @@ import org.jboss.logging.Logger;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
-@Path("/")
+@Path("")
 @Produces(MediaType.APPLICATION_JSON)
 public class LlamaStackEndpoint {
     private static final Logger LOG = Logger.getLogger(LlamaStackEndpoint.class);
 
     @Inject
     McpService mcpService;
-
-    @Inject
-    ObjectMapper objectMapper;
 
     @GET
     @Path("/tools/_stcore/health")
@@ -46,15 +44,27 @@ public class LlamaStackEndpoint {
     @GET
     @Path("/v1/tools")
     @SuppressWarnings("unchecked")
-    public Map<String, Object> listTools(@QueryParam("toolgroup_id") String toolGroupId) {
+    public LlamaStackToolListResponse listTools(@QueryParam("toolgroup_id") String toolGroupId) {
         LOG.infof("LlamaStack list tools invoked for group %s", toolGroupId);
         JsonRpcResponse response = mcpService.handleToolsList(toolGroupId != null ? toolGroupId : "llama-stack");
         Object result = response.getResult();
         List<Tool> tools = result instanceof List ? (List<Tool>) result : List.of();
-        return Map.of(
-            "object", "list",
-            "data", tools
-        );
+        List<LlamaStackTool> mapped = tools.stream().map(this::mapTool).collect(Collectors.toList());
+        LlamaStackToolListResponse payload = new LlamaStackToolListResponse();
+        payload.setData(mapped);
+        payload.setHasMore(false);
+        return payload;
+    }
+
+    private LlamaStackTool mapTool(Tool tool) {
+        LlamaStackTool dto = new LlamaStackTool();
+        String identifier = tool.getName();
+        dto.setId(identifier);
+        dto.setIdentifier(identifier);
+        dto.setName(tool.getName());
+        dto.setDescription(tool.getDescription());
+        dto.setInputSchema(tool.getInputSchema());
+        return dto;
     }
 }
 

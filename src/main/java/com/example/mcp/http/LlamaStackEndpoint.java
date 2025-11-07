@@ -20,6 +20,7 @@ import java.util.Map;
 
 @ApplicationScoped
 @Path("/")
+@Produces(MediaType.APPLICATION_JSON)
 public class LlamaStackEndpoint {
     private static final Logger LOG = Logger.getLogger(LlamaStackEndpoint.class);
 
@@ -31,14 +32,12 @@ public class LlamaStackEndpoint {
 
     @GET
     @Path("tools/_stcore/health")
-    @Produces(MediaType.APPLICATION_JSON)
     public Map<String, String> toolsHealth() {
         return Map.of("status", "ok");
     }
 
     @GET
     @Path("tools/_stcore/host-config")
-    @Produces(MediaType.APPLICATION_JSON)
     public Map<String, Object> hostConfig() {
         // Streamlit expects a JSON object even if empty
         return Collections.emptyMap();
@@ -46,7 +45,6 @@ public class LlamaStackEndpoint {
 
     @GET
     @Path("v1/tools")
-    @Produces(MediaType.APPLICATION_JSON)
     @SuppressWarnings("unchecked")
     public Map<String, Object> listTools(@QueryParam("toolgroup_id") String toolGroupId) {
         LOG.infof("LlamaStack list tools invoked for group %s", toolGroupId);
@@ -54,6 +52,7 @@ public class LlamaStackEndpoint {
         Object result = response.getResult();
         List<Tool> tools = result instanceof List ? (List<Tool>) result : List.of();
         return Map.of(
+            "object", "list",
             "data", tools
         );
     }
